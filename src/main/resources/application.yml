@@ -1,0 +1,21 @@
+server:
+  port: 9999
+  servlet:
+    context-path: /
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  application:
+    name: file-server
+
+file:
+  storage:
+    base-path: /home/kihoro/Desktop/Dont Delete/others/projects/files
+
+  token:
+    expiry:
+      minutes: 3
+    secret: qewegrhtfjygkuhlinno3qj4jiu85uqkERTYGUHIIHH4TFJHB

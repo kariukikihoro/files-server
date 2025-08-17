@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Server Test Interface</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        h1 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 35px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .upload-btn {
+            background: #2ecc71;
+        }
+        .upload-btn:hover {
+            background: #27ae60;
+        }
+        .accessibility-btn {
+            background: #9b59b6;
+        }
+        .accessibility-btn:hover {
+            background: #8e44ad;
+        }
+        input[type="file"] {
+            margin: 15px 0;
+            padding: 10px;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 500px;
+        }
+        select {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            min-width: 200px;
+            font-size: 14px;
+        }
+        .file-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #eee;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.2s;
+        }
+        .file-item:hover {
+            background-color: #f1f8ff;
+        }
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        .file-actions button {
+            margin-left: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        .serve-btn {
+            background: #3498db;
+        }
+        .serve-btn:hover {
+            background: #2980b9;
+        }
+        .download-btn {
+            background: #f39c12;
+            color: white;
+        }
+        .download-btn:hover {
+            background: #e67e22;
+        }
+        .debug-btn {
+            background: #9b59b6;
+        }
+        .debug-btn:hover {
+            background: #8e44ad;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        .status.success {
+            background: #e8f8f5;
+            color: #27ae60;
+            border-left: 4px solid #2ecc71;
+        }
+        .status.error {
+            background: #fdedec;
+            color: #e74c3c;
+            border-left: 4px solid #e74c3c;
+        }
+        .status.info {
+            background: #eaf2f8;
+            color: #2980b9;
+            border-left: 4px solid #3498db;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffeeba;
+        }
+        .info-panel {
+            background: #f5f6fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #7f8c8d;
+        }
+        .debug-panel {
+            background: #f0e6ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #9b59b6;
+        }
+        .debug-info {
+            font-family: 'Courier New', Courier, monospace;
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .recommendations {
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+        .recommendations li {
+            margin-bottom: 8px;
+        }
+        .access-status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .access-true {
+            background: #2ecc71;
+            color: white;
+        }
+        .access-false {
+            background: #e74c3c;
+            color: white;
+        }
+        .server-check-panel {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        .server-status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online {
+            background-color: #2ecc71;
+        }
+        .status-offline {
+            background-color: #e74c3c;
+        }
+        .status-warning {
+            background-color: #f39c12;
+        }
+        .connectivity-test-results {
+            margin-top: 15px;
+        }
+        .test-result-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .test-result-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        .test-success {
+            color: #2ecc71;
+        }
+        .test-failure {
+            color: #e74c3c;
+        }
+        .test-warning {
+            color: #f39c12;
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-left: 4px solid #3498db;
+            transform: translateX(450px);
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: #2ecc71;
+        }
+
+        .toast.error {
+            border-left-color: #e74c3c;
+        }
+
+        .toast.info {
+            border-left-color: #3498db;
+        }
+
+        .toast.warning {
+            border-left-color: #f39c12;
+        }
+
+        .toast .toast-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toast .toast-body {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .toast .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            margin-left: 10px;
+        }
+
+        .toast .toast-close:hover {
+            color: #333;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .file-actions {
+                margin-top: 8px;
+                width: 100%;
+                display: flex;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="toast-container" id="toastContainer"></div>
+
+<h1>File Server Test Interface</h1>
+
+<div class="container">
+    <div class="section">
+        <h2>Server Status</h2>
+        <button onclick="checkServerStatus()">Check Server Status</button>
+        <button onclick="loadFileTypes()">Load Available Types</button>
+        <button class="accessibility-btn" onclick="checkServerAccessibility()">Check Server Accessibility</button>
+        <div id="serverStatus" class="info-panel"></div>
+        <div id="serverAccessResults" class="server-check-panel" style="display: none;"></div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="section">
+        <h2>File Upload</h2>
+        <select id="uploadType">
+            <option value="">Auto-detect type</option>
+            <option value="documents">Documents</option>
+            <option value="images">Images</option>
+            <option value="videos">Videos</option>
+            <option value="office">Office</option>
+            <option value="pdfs">PDFs</option>
+            <option value="text">Text</option>
+        </select>
+        <br>
+        <input type="file" id="fileInput" multiple>
+        <br>
+        <button class="upload-btn" onclick="uploadFiles()">Upload Files</button>
+        <button class="upload-btn" onclick="uploadBatchFiles()">Batch Upload</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="section">
+        <h2>Browse Files by Type</h2>
+        <div id="fileTypeSelector">
+            <button onclick="loadFilesByType('documents')">Documents</button>
+            <button onclick="loadFilesByType('images')">Images</button>
+            <button onclick="loadFilesByType('videos')">Videos</button>
+            <button onclick="loadFilesByType('office')">Office</button>
+            <button onclick="loadFilesByType('pdfs')">PDFs</button>
+            <button onclick="loadFilesByType('text')">Text</button>
+        </div>
+        <div id="filesList"></div>
+    </div>
+</div>
+
+<div class="container" id="debugContainer" style="display: none;">
+    <div class="section">
+        <h2>File Access Debug</h2>
+        <div id="debugInfo" class="debug-panel">
+            <p>Select a file and click "Debug Access" to analyze its accessibility</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const BASE_URL = 'http://localhost:9999';
+
+    // Toast notification system
+    function showToast(message, type = 'info', duration = 3000) {
+        const toastContainer = document.getElementById('toastContainer');
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+
+        const toastId = Date.now() + Math.random();
+        toast.id = `toast-${toastId}`;
+
+        toast.innerHTML = `
+            <div class="toast-header">
+                <span>${getToastTitle(type)}</span>
+                <button class="toast-close" onclick="closeToast('${toastId}')">&times;</button>
+            </div>
+            <div class="toast-body">${message}</div>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        // Trigger animation
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+
+        // Auto-remove after duration
+        setTimeout(() => {
+            closeToast(toastId);
+        }, duration);
+
+        return toastId;
+    }
+
+    function getToastTitle(type) {
+        const titles = {
+            'success': 'Success',
+            'error': 'Error',
+            'info': 'Info',
+            'warning': 'Warning'
+        };
+        return titles[type] || 'Notification';
+    }
+
+    function closeToast(toastId) {
+        const toast = document.getElementById(`toast-${toastId}`);
+        if (toast) {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }
+    }
+
+    async function checkServerStatus() {
+        const statusDiv = document.getElementById('serverStatus');
+        try {
+            const response = await fetch(`${BASE_URL}/api/files/types`);
+            if (response.ok) {
+                const data = await response.json();
+                statusDiv.innerHTML = `
+                    <div class="status success">
+                        <strong>Server is running!</strong><br>
+                        Base Path: ${data.basePath}<br>
+                        Available Types: ${data.availableTypes.join(', ')}
+                    </div>
+                `;
+                showToast('Server is online and ready!', 'success');
+            } else {
+                statusDiv.innerHTML = '<div class="status error">Server responded with error</div>';
+                showToast('Server responded with error', 'error');
+            }
+        } catch (error) {
+            statusDiv.innerHTML = `<div class="status error">Server not accessible: ${error.message}</div>`;
+            showToast(`Server not accessible: ${error.message}`, 'error');
+        }
+    }
+
+    async function checkServerAccessibility() {
+        const resultsDiv = document.getElementById('serverAccessResults');
+        resultsDiv.style.display = 'block';
+        resultsDiv.innerHTML = '<p>Running accessibility tests...</p>';
+
+        try {
+            // First check if server is reachable locally
+            const testResponse = await fetch(`${BASE_URL}/api/files/debug-access?type=test&filename=test`);
+            const debugInfo = await testResponse.json();
+
+            let html = `
+                <h3>Server Accessibility Report</h3>
+                <div class="test-result-item">
+                    <span class="test-result-icon">🔍</span>
+                    <div>
+                        <strong>Server Configuration:</strong>
+                        <div class="debug-info" style="margin-top: 5px;">
+                            <div>${debugInfo.isLocalhost ? '🖥️ Running on localhost' : '🌍 Public server detected'}</div>
+                            <div>${debugInfo.isPrivateNetwork ? '🔒 Private network detected' : '🔓 Public network detected'}</div>
+                            <div>Base URL: ${debugInfo.serverUrl || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Test external accessibility if not localhost
+            if (!debugInfo.isLocalhost) {
+                try {
+                    const externalTest = await fetch(`https://httpbin.org/get?url=${encodeURIComponent(debugInfo.serverUrl)}`);
+                    const externalResult = await externalTest.json();
+
+                    html += `
+                        <div class="test-result-item">
+                            <span class="test-result-icon test-success">✓</span>
+                            <div>
+                                <strong>Public Accessibility:</strong>
+                                <span class="access-status access-true">Accessible from internet</span>
+                                <div class="debug-info" style="margin-top: 5px;">
+                                    External test successful from cloud service
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } catch (e) {
+                    html += `
+                        <div class="test-result-item">
+                            <span class="test-result-icon test-failure">✗</span>
+                            <div>
+                                <strong>Public Accessibility:</strong>
+                                <span class="access-status access-false">Not accessible from internet</span>
+                                <div class="debug-info" style="margin-top: 5px;">
+                                    Failed to reach server from external network. Check:
+                                    <ul>
+                                        <li>Firewall settings</li>
+                                        <li>Port forwarding</li>
+                                        <li>ISP restrictions</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else {
+                html += `
+                    <div class="test-result-item">
+                        <span class="test-result-icon test-warning">⚠️</span>
+                        <div>
+                            <strong>Public Accessibility:</strong>
+                            <span class="access-status access-false">Localhost cannot be public</span>
+                            <div class="debug-info" style="margin-top: 5px;">
+                                To make this server publicly accessible:
+                                <ul>
+                                    <li>Deploy to a cloud provider (AWS, GCP, Azure)</li>
+                                    <li>Use a tunneling service like ngrok</li>
+                                    <li>Configure port forwarding on your router</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Add recommendations if any
+            if (debugInfo.recommendations && debugInfo.recommendations.length > 0) {
+                html += `
+                    <div class="test-result-item">
+                        <span class="test-result-icon">💡</span>
+                        <div>
+                            <strong>Recommendations:</strong>
+                            <ul>
+                                ${debugInfo.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = html;
+            showToast('Server accessibility check completed', 'success');
+
+        } catch (error) {
+            resultsDiv.innerHTML = `
+                <div class="status error">
+                    Failed to check server accessibility: ${error.message}
+                </div>
+            `;
+            showToast('Failed to check server accessibility', 'error');
+        }
+    }
+
+    async function loadFileTypes() {
+        try {
+            const response = await fetch(`${BASE_URL}/api/files/types`);
+            const data = await response.json();
+
+            let html = '<h3>Files by Type:</h3>';
+            let totalFiles = 0;
+            for (const [type, files] of Object.entries(data.filesByType)) {
+                html += `<strong>${type}:</strong> ${files.length} files<br>`;
+                totalFiles += files.length;
+            }
+
+            document.getElementById('serverStatus').innerHTML += html;
+            showToast(`Found ${totalFiles} files across ${Object.keys(data.filesByType).length} categories`, 'info');
+        } catch (error) {
+            console.error('Error loading file types:', error);
+            showToast('Error loading file types', 'error');
+        }
+    }
+
+    async function uploadFiles() {
+        const fileInput = document.getElementById('fileInput');
+        const uploadType = document.getElementById('uploadType').value;
+
+        if (fileInput.files.length === 0) {
+            showToast('Please select files to upload', 'error');
+            return;
+        }
+
+        showToast('Starting upload...', 'info', 2000);
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (let file of fileInput.files) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                let url = `${BASE_URL}/api/upload`;
+                if (uploadType && uploadType.trim() !== '') {
+                    url += `?type=${uploadType}`;
+                }
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    successCount++;
+                    showToast(`✓ ${file.name} → ${result.type}`, 'success');
+                } else {
+                    errorCount++;
+                    showToast(`✗ ${file.name}: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                errorCount++;
+                showToast(`✗ ${file.name}: ${error.message}`, 'error');
+            }
+        }
+
+        // Summary toast
+        setTimeout(() => {
+            if (successCount > 0 && errorCount === 0) {
+                showToast(`All ${successCount} files uploaded successfully!`, 'success');
+            } else if (successCount > 0 && errorCount > 0) {
+                showToast(`Upload complete: ${successCount} success, ${errorCount} failed`, 'info');
+            } else if (errorCount > 0) {
+                showToast(`Upload failed: ${errorCount} files had errors`, 'error');
+            }
+        }, 1000);
+    }
+
+    async function uploadBatchFiles() {
+        const fileInput = document.getElementById('fileInput');
+        const uploadType = document.getElementById('uploadType').value;
+
+        if (fileInput.files.length === 0) {
+            showToast('Please select files to upload', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        Array.from(fileInput.files).forEach(file => {
+            formData.append('files', file);
+        });
+
+        try {
+            showToast(`Batch uploading ${fileInput.files.length} files...`, 'info');
+
+            let url = `${BASE_URL}/api/upload/batch`;
+            if (uploadType && uploadType.trim() !== '') {
+                url += `?type=${uploadType}`;
+            }
+
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            showToast(`Batch upload complete: ${result.successCount} success, ${result.failureCount} failed`,
+                result.failureCount === 0 ? 'success' : 'info');
+
+            // Show individual file results
+            Object.entries(result.results).forEach(([filename, fileResult]) => {
+                if (fileResult.success) {
+                    showToast(`✓ ${filename} → ${fileResult.type}`, 'success', 2000);
+                } else {
+                    showToast(`✗ ${filename}: ${fileResult.error}`, 'error', 4000);
+                }
+            });
+
+        } catch (error) {
+            showToast(`Batch upload failed: ${error.message}`, 'error');
+        }
+    }
+
+    async function loadFilesByType(type) {
+        const filesDiv = document.getElementById('filesList');
+        filesDiv.innerHTML = `<h3>Loading ${type} files...</h3>`;
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/files/list?type=${type}`);
+            const files = await response.json();
+
+            if (files.length === 0) {
+                filesDiv.innerHTML = `<h3>${type.toUpperCase()}</h3><p>No files found in this category.</p>`;
+                showToast(`No files found in ${type} category`, 'info');
+                return;
+            }
+
+            let html = `<h3>${type.toUpperCase()} (${files.length} files)</h3><div class="file-list">`;
+
+            files.forEach(filename => {
+                html += `
+                    <div class="file-item">
+                        <span>${filename}</span>
+                        <div class="file-actions">
+                            <button class="serve-btn" onclick="serveFile('${type}', '${filename}')">View</button>
+                            <button class="download-btn" onclick="downloadFile('${type}', '${filename}')">Download</button>
+                            <button class="debug-btn" onclick="debugFileAccess('${type}', '${filename}')">Debug Access</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            filesDiv.innerHTML = html;
+            showToast(`Loaded ${files.length} files from ${type}`, 'success');
+
+        } catch (error) {
+            filesDiv.innerHTML = `<div class="status error">Error loading files: ${error.message}</div>`;
+            showToast(`Error loading ${type} files: ${error.message}`, 'error');
+        }
+    }
+
+    function serveFile(type, filename) {
+        const url = `${BASE_URL}/api/files/serve?type=${type}&filename=${encodeURIComponent(filename)}`;
+        window.open(url, '_blank');
+        showToast(`Opening ${filename}`, 'info', 2000);
+    }
+
+    function downloadFile(type, filename) {
+        const url = `${BASE_URL}/api/files/download?type=${type}&filename=${encodeURIComponent(filename)}`;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast(`Downloading ${filename}`, 'success', 2000);
+    }
+
+    async function debugFileAccess(type, filename) {
+        const debugDiv = document.getElementById('debugInfo');
+        debugDiv.innerHTML = '<p>Checking file access configuration...</p>';
+        document.getElementById('debugContainer').style.display = 'block';
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/files/debug-access?type=${type}&filename=${encodeURIComponent(filename)}`);
+            const debugInfo = await response.json();
+
+            if (debugInfo.error) {
+                debugDiv.innerHTML = `
+                    <div class="status error">
+                        <strong>Debug Error:</strong> ${debugInfo.error}
+                        ${debugInfo.message ? `<br>${debugInfo.message}` : ''}
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <h3>Debug Information for: ${filename}</h3>
+                <div class="debug-info">
+                    <strong>Server URL:</strong> ${debugInfo.serverUrl || 'N/A'}<br>
+                    <strong>File URL:</strong> ${debugInfo.fileUrl || 'N/A'}<br>
+                    <strong>Running on localhost:</strong> ${debugInfo.isLocalhost ? 'Yes' : 'No'}<br>
+                    <strong>Private network:</strong> ${debugInfo.isPrivateNetwork ? 'Yes' : 'No'}<br>
+                    <strong>File exists:</strong> ${debugInfo.fileExists ? 'Yes' : 'No'}<br>
+                    <strong>Accessible from internet:</strong>
+                    <span class="access-status ${debugInfo.accessibleFromInternet ? 'access-true' : 'access-false'}">
+                        ${debugInfo.accessibleFromInternet ? 'Yes' : 'No'}
+                    </span><br>
+                    ${debugInfo.fileSize ? `<strong>File size:</strong> ${debugInfo.fileSize} bytes (${debugInfo.fileSizeMB.toFixed(2)} MB)<br>` : ''}
+                </div>
+            `;
+
+            if (debugInfo.recommendations && debugInfo.recommendations.length > 0) {
+                html += `
+                    <div class="status warning">
+                        <strong>Recommendations:</strong>
+                        <ul class="recommendations">
+                            ${debugInfo.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            debugDiv.innerHTML = html;
+
+            // Scroll to debug panel
+            document.getElementById('debugContainer').scrollIntoView({ behavior: 'smooth' });
+
+        } catch (error) {
+            debugDiv.innerHTML = `
+                <div class="status error">
+                    <strong>Debug Error:</strong> ${error.message}
+                </div>
+            `;
+            showToast('Failed to debug file access', 'error');
+        }
+    }
+
+    // Initialize
+    window.onload = function() {
+        checkServerStatus();
+    };
+</script>
+</body>
+</html>

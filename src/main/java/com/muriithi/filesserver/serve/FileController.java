@@ -1,5 +1,7 @@
 package com.muriithi.filesserver.serve;
 
+import com.muriithi.filesserver.renderviaweb.ContentTypeHelper;
+import com.muriithi.filesserver.renderviaweb.RenderWebDocumentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.*;
 
 @RestController
 @RequestMapping("/api/files")
@@ -25,8 +26,8 @@ import java.util.concurrent.*;
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.HEAD, RequestMethod.OPTIONS})
 public class FileController {
 
-
     private final FileService fileService;
+    private final RenderWebDocumentService renderWebDocumentService;
     private final UtilityMethodsService utilityMethodsService;
 
     private static final Logger log = LoggerFactory.getLogger(FileController.class);
@@ -69,7 +70,38 @@ public class FileController {
     }
 
     @GetMapping("/serve")
-    public void serveFile(@RequestParam String type,
+    public void serveFileViaWebLocally(@RequestParam String type,
+                                           @RequestParam String filename,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response) throws IOException {
+        if (type == null || filename == null) {
+            response.sendError(HttpStatus.BAD_REQUEST.value(), "Type and filename are required");
+            return;
+        }
+        if (!utilityMethodsService.isValidInput(type, filename)) {
+            response.sendError(HttpStatus.BAD_REQUEST.value(), "Invalid parameters");
+            return;
+        }
+
+        log.info("Serving file: {} from type: {} for client IP: {}", filename, type, request.getRemoteAddr());
+        utilityMethodsService.setCorsHeaders(response);
+
+        try {
+            byte[] content = fileService.getFileContent(type, filename);
+            if (content == null) {
+                log.error("File not found: {} in type: {}", filename, type);
+                response.sendError(HttpStatus.NOT_FOUND.value(), "File not found");
+            }
+            renderWebDocumentService.renderThumbNailLocally(content, filename, ContentTypeHelper.getContentType(filename), response);
+
+        } catch (Exception e) {
+            log.error("Error serving file: {} for client IP: {}", filename, request.getRemoteAddr(), e);
+            response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error serving file");
+        }
+    }
+
+    @GetMapping("/serve-online")
+    public void serveFileUsingOfficeOnline(@RequestParam String type,
                           @RequestParam String filename,
                           HttpServletRequest request,
                           HttpServletResponse response) throws IOException {
@@ -105,7 +137,7 @@ public class FileController {
                 return;
             }
 
-            if ((filename.toLowerCase().endsWith(".msg")|| filename.toLowerCase().endsWith(".eml"))) {
+            if ((filename.toLowerCase().endsWith(".msg") || filename.toLowerCase().endsWith(".eml"))) {
                 fileService.serveMsgFile(type, filename, response);
                 return;
             }
@@ -300,7 +332,7 @@ public class FileController {
             String token = utilityMethodsService.generateToken(filename, type);
             return ResponseEntity.ok(Map.of(
                     "token", token,
-                    "expiresIn",  tokenExpiryMinutes + " minutes",
+                    "expiresIn", tokenExpiryMinutes + " minutes",
                     "publicUrl", utilityMethodsService.getPublicFileUrlWithToken(filename, token, request)
             ));
         } catch (Exception e) {

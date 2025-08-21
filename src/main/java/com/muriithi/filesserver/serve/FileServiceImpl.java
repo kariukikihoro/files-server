@@ -280,6 +280,8 @@ public class FileServiceImpl implements FileService {
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Expires", "0");
 
+        log.info("HTML content:::::::::::: {}\n ==============={}", htmlContent, response.getOutputStream());
+
         try (java.io.PrintWriter writer = response.getWriter()) {
             writer.write(htmlContent);
         }
